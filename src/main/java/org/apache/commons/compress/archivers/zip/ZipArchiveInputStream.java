@@ -57,7 +57,20 @@ import static org.apache.commons.compress.archivers.zip.ZipConstants.ZIP64_MAGIC
  * @NotThreadSafe
  */
 public class ZipArchiveInputStream extends ArchiveInputStream {
-
+static final int MIN_EOCD_SIZE =
+        /* end of central dir signature    */ WORD
+        /* number of this disk             */ + SHORT
+        /* number of the disk with the     */
+        /* start of the central directory  */ + SHORT
+        /* total number of entries in      */
+        /* the central dir on this disk    */ + SHORT
+        /* total number of entries in      */
+        /* the central dir                 */ + SHORT
+        /* size of the central directory   */ + WORD
+        /* offset of start of central      */
+        /* directory with respect to       */
+        /* the starting disk number        */ + WORD
+        /* zipfile comment length          */ + SHORT;
     /** The zip encoding to use for filenames and the file comment. */
     private final ZipEncoding zipEncoding;
 
@@ -222,7 +235,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream {
 
         int versionMadeBy = ZipShort.getValue(LFH_BUF, off);
         off += SHORT;
-        current.entry.setPlatform((versionMadeBy >> ZipFile.BYTE_SHIFT) & ZipFile.NIBLET_MASK);
+        current.entry.setPlatform((versionMadeBy >> 8) &  0x0f);
 
         final GeneralPurposeBit gpFlag = GeneralPurposeBit.parse(LFH_BUF, off);
         final boolean hasUTF8Flag = gpFlag.usesUTF8ForNames();
@@ -862,7 +875,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream {
         // data so it will be too short.
         realSkip(entriesRead * CFH_LEN - LFH_LEN);
         findEocdRecord();
-        realSkip(ZipFile.MIN_EOCD_SIZE - WORD /* signature */ - SHORT /* comment len */);
+        realSkip(MIN_EOCD_SIZE - WORD /* signature */ - SHORT /* comment len */);
         readFully(SHORT_BUF);
         // file comment
         realSkip(ZipShort.getValue(SHORT_BUF));

@@ -28,10 +28,8 @@ import org.apache.commons.compress.archivers.ar.ArArchiveOutputStream;
 import org.apache.commons.compress.archivers.arj.ArjArchiveInputStream;
 import org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream;
 import org.apache.commons.compress.archivers.cpio.CpioArchiveOutputStream;
-import org.apache.commons.compress.archivers.dump.DumpArchiveInputStream;
 import org.apache.commons.compress.archivers.jar.JarArchiveInputStream;
 import org.apache.commons.compress.archivers.jar.JarArchiveOutputStream;
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -199,14 +197,7 @@ public class ArchiveStreamFactory {
             } else {
                 return new CpioArchiveInputStream(in);
             }
-        }
-        if (DUMP.equalsIgnoreCase(archiverName)) {
-            if (entryEncoding != null) {
-                return new DumpArchiveInputStream(in, entryEncoding);
-            } else {
-                return new DumpArchiveInputStream(in);
-            }
-        }
+        }       
         if (SEVEN_Z.equalsIgnoreCase(archiverName)) {
             throw new StreamingNotSupportedException(SEVEN_Z);
         }
@@ -309,18 +300,13 @@ public class ArchiveStreamFactory {
                 return new CpioArchiveInputStream(in);
             } else if (ArjArchiveInputStream.matches(signature, signatureLength)) {
                 return new ArjArchiveInputStream(in);
-            } else if (SevenZFile.matches(signature, signatureLength)) {
-                throw new StreamingNotSupportedException(SEVEN_Z);
             }
 
             // Dump needs a bigger buffer to check the signature;
             final byte[] dumpsig = new byte[32];
             in.mark(dumpsig.length);
             signatureLength = IOUtils.readFully(in, dumpsig);
-            in.reset();
-            if (DumpArchiveInputStream.matches(dumpsig, signatureLength)) {
-                return new DumpArchiveInputStream(in);
-            }
+            in.reset();         
 
             // Tar needs an even bigger buffer to check the signature; read the first block
             final byte[] tarheader = new byte[512];

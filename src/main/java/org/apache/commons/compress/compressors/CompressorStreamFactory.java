@@ -28,10 +28,6 @@ import org.apache.commons.compress.compressors.deflate.DeflateCompressorInputStr
 import org.apache.commons.compress.compressors.deflate.DeflateCompressorOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
-import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
-import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
-import org.apache.commons.compress.compressors.xz.XZCompressorOutputStream;
-import org.apache.commons.compress.compressors.xz.XZUtils;
 import org.apache.commons.compress.compressors.pack200.Pack200CompressorInputStream;
 import org.apache.commons.compress.compressors.pack200.Pack200CompressorOutputStream;
 import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorInputStream;
@@ -186,10 +182,7 @@ public class CompressorStreamFactory {
                 return new ZCompressorInputStream(in);
             }
 
-            if (XZUtils.matches(signature, signatureLength) &&
-                XZUtils.isXZCompressionAvailable()) {
-                return new XZCompressorInputStream(in, decompressConcatenated);
-            }
+            
 
         } catch (IOException e) {
             throw new CompressorException("Failed to detect Compressor from InputStream.", e);
@@ -223,16 +216,8 @@ public class CompressorStreamFactory {
 
             if (BZIP2.equalsIgnoreCase(name)) {
                 return new BZip2CompressorInputStream(in, decompressConcatenated);
-            }
-
-            if (XZ.equalsIgnoreCase(name)) {
-                return new XZCompressorInputStream(in, decompressConcatenated);
-            }
-
-            if (LZMA.equalsIgnoreCase(name)) {
-                return new LZMACompressorInputStream(in);
-            }
-
+            }          
+            
             if (PACK200.equalsIgnoreCase(name)) {
                 return new Pack200CompressorInputStream(in);
             }
@@ -285,11 +270,7 @@ public class CompressorStreamFactory {
 
             if (BZIP2.equalsIgnoreCase(name)) {
                 return new BZip2CompressorOutputStream(out);
-            }
-
-            if (XZ.equalsIgnoreCase(name)) {
-                return new XZCompressorOutputStream(out);
-            }
+            }         
 
             if (PACK200.equalsIgnoreCase(name)) {
                 return new Pack200CompressorOutputStream(out);

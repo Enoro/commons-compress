@@ -52,7 +52,7 @@ import java.nio.charset.Charset;
  *
  * @see <a href="http://docs.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
  * @since 1.4
- * @version $Id$
+ * @version $Id: Charsets.java 1552970 2013-12-22 07:03:43Z bodewig $
  */
 public class Charsets {
 
