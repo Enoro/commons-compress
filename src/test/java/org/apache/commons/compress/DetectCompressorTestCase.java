@@ -32,7 +32,6 @@ import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.pack200.Pack200CompressorInputStream;
-import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 
 public final class DetectCompressorTestCase extends TestCase {
 
@@ -55,9 +54,7 @@ public final class DetectCompressorTestCase extends TestCase {
         assertNotNull(pack200);
         assertTrue(pack200 instanceof Pack200CompressorInputStream);
 
-        CompressorInputStream xz = getStreamFor("bla.tar.xz");
-        assertNotNull(xz);
-        assertTrue(xz instanceof XZCompressorInputStream);
+        
 
         try {
             factory.createCompressorInputStream(new ByteArrayInputStream(new byte[0]));

@@ -102,62 +102,7 @@ public class Zip64SupportIT {
         read100KFilesImpl(get100KFileFileGeneratedByPKZip());
     }
 
-    @Test public void read5GBOfZerosUsingZipFile() throws Throwable {
-        read5GBOfZerosUsingZipFileImpl(get5GBZerosFile(), "5GB_of_Zeros");
-    }
-
-    @Test public void read5GBOfZerosGeneratedBy7ZIPUsingZipFile()
-        throws Throwable {
-        read5GBOfZerosUsingZipFileImpl(get5GBZerosFileGeneratedBy7ZIP(),
-                                       "5GB_of_Zeros");
-    }
-
-    @Test public void read5GBOfZerosGeneratedByJava7JarUsingZipFile()
-        throws Throwable {
-        read5GBOfZerosUsingZipFileImpl(get5GBZerosFileGeneratedByJava7Jar(),
-                                       "5GB_of_Zeros");
-    }
-
-    @Test public void read5GBOfZerosGeneratedByWinZIPUsingZipFile()
-        throws Throwable {
-        read5GBOfZerosUsingZipFileImpl(get5GBZerosFileGeneratedByWinZIP(),
-                                       "5GB_of_Zeros");
-    }
-
-    @Test public void read5GBOfZerosGeneratedByPKZipUsingZipFile()
-        throws Throwable {
-        read5GBOfZerosUsingZipFileImpl(get5GBZerosFileGeneratedByPKZip(),
-                                       "zip6/5GB_of_Zeros");
-    }
-
-    @Test public void read100KFilesUsingZipFile() throws Throwable {
-        read100KFilesUsingZipFileImpl(get100KFileFile());
-    }
-
-    @Test public void read100KFilesGeneratedBy7ZIPUsingZipFile()
-        throws Throwable {
-        read100KFilesUsingZipFileImpl(get100KFileFileGeneratedBy7ZIP());
-    }
-
-    @Test public void read100KFilesGeneratedByWinCFUsingZipFile()
-        throws Throwable {
-        read100KFilesUsingZipFileImpl(get100KFileFileGeneratedByWinCF());
-    }
-
-    @Test public void read100KFilesGeneratedByJava7JarUsingZipFile()
-        throws Throwable {
-        read100KFilesUsingZipFileImpl(get100KFileFileGeneratedByJava7Jar());
-    }
-
-    @Test public void read100KFilesGeneratedByWinZIPUsingZipFile()
-        throws Throwable {
-        read100KFilesUsingZipFileImpl(get100KFileFileGeneratedByWinZIP());
-    }
-
-    @Test public void read100KFilesGeneratedByPKZipUsingZipFile()
-        throws Throwable {
-        read100KFilesUsingZipFileImpl(get100KFileFileGeneratedByPKZip());
-    }
+   
 
     private static ZipOutputTest write100KFiles() {
         return write100KFiles(Zip64Mode.AsNeeded);
@@ -305,19 +250,7 @@ public class Zip64SupportIT {
                              write100KFilesModeNever, false);
     }
 
-    @Test public void readSelfGenerated100KFilesUsingZipFile()
-        throws Throwable {
-        withTemporaryArchive("readSelfGenerated100KFilesUsingZipFile()",
-                             new ZipOutputTest() {
-                                 public void test(File f,
-                                                  ZipArchiveOutputStream zos)
-                                     throws IOException {
-                                     write100KFilesToStream(zos);
-                                     read100KFilesUsingZipFileImpl(f);
-                                 }
-                             },
-                             true);
-    }
+
 
     private static ZipOutputTest write3EntriesCreatingBigArchive() {
         return write3EntriesCreatingBigArchive(Zip64Mode.AsNeeded);
@@ -473,48 +406,7 @@ public class Zip64SupportIT {
                              false);
     }
 
-    @Test public void read3EntriesCreatingBigArchiveFileUsingZipFile()
-        throws Throwable {
-        withTemporaryArchive("read3EntriesCreatingBigArchiveFileUsingZipFile",
-                             new ZipOutputTest() {
-                                 public void test(File f,
-                                                  ZipArchiveOutputStream zos)
-                                     throws IOException {
-                                     write3EntriesCreatingBigArchiveToStream(zos);
-                                     ZipFile zf = null;
-                                     try {
-                                         zf = new ZipFile(f);
-                                         int idx = 0;
-                                         for (Enumeration<ZipArchiveEntry> e =
-                                                  zf.getEntriesInPhysicalOrder();
-                                              e.hasMoreElements(); ) {
-                                             ZipArchiveEntry zae = e.nextElement();
-                                             assertEquals(String.valueOf(idx),
-                                                          zae.getName());
-                                             if (idx++ < 2) {
-                                                 assertEquals(FIVE_BILLION / 2,
-                                                              zae.getSize());
-                                             } else {
-                                                 assertEquals(1,
-                                                              zae.getSize());
-                                                 InputStream i =
-                                                     zf.getInputStream(zae);
-                                                 try {
-                                                     assertNotNull(i);
-                                                     assertEquals(42, i.read());
-                                                 } finally {
-                                                     i.close();
-                                                 }
-                                             }
-                                         }
-                                     } finally {
-                                         ZipFile.closeQuietly(zf);
-                                     }
-                                 }
-                             },
-                             true);
-    }
-
+   
     private static ZipOutputTest writeBigStoredEntry(final boolean knownSize) {
         return writeBigStoredEntry(knownSize, Zip64Mode.AsNeeded);
     }
@@ -2403,45 +2295,7 @@ public class Zip64SupportIT {
         }
     }
 
-    private static void read5GBOfZerosUsingZipFileImpl(File f,
-                                                       String expectedName)
-        throws IOException {
-        ZipFile zf = null;
-        try {
-            zf = new ZipFile(f);
-            Enumeration<ZipArchiveEntry> e = zf.getEntries();
-            assertTrue(e.hasMoreElements());
-            ZipArchiveEntry zae = e.nextElement();
-            while (zae.isDirectory()) {
-                zae = e.nextElement();
-            }
-            assertEquals(expectedName, zae.getName());
-            assertEquals(FIVE_BILLION, zae.getSize());
-            byte[] buf = new byte[1024 * 1024];
-            long read = 0;
-            Random r = new Random(System.currentTimeMillis());
-            int readNow;
-            InputStream zin = zf.getInputStream(zae);
-            try {
-                while ((readNow = zin.read(buf, 0, buf.length)) > 0) {
-                    // testing all bytes for a value of 0 is going to take
-                    // too long, just pick a few ones randomly
-                    for (int i = 0; i < 1024; i++) {
-                        int idx = r.nextInt(readNow);
-                        assertEquals("testing byte " + (read + idx), 0, buf[idx]);
-                    }
-                    read += readNow;
-                }
-            } finally {
-                zin.close();
-            }
-            assertEquals(FIVE_BILLION, read);
-            assertFalse(e.hasMoreElements());
-        } finally {
-            ZipFile.closeQuietly(zf);
-        }
-    }
-
+   
     private static void read100KFilesImpl(File f) throws IOException {
         FileInputStream fin = new FileInputStream(f);
         ZipArchiveInputStream zin = null;
@@ -2464,24 +2318,7 @@ public class Zip64SupportIT {
         }
     }
 
-    private static void read100KFilesUsingZipFileImpl(File f)
-        throws IOException {
-        ZipFile zf = null;
-        try {
-            zf = new ZipFile(f);
-            int files = 0;
-            for (Enumeration<ZipArchiveEntry> e = zf.getEntries(); e.hasMoreElements(); ) {
-                ZipArchiveEntry zae = e.nextElement();
-                if (!zae.isDirectory()) {
-                    files++;
-                    assertEquals(0, zae.getSize());
-                }
-            }
-            assertEquals(ONE_HUNDRED_THOUSAND, files);
-        } finally {
-            ZipFile.closeQuietly(zf);
-        }
-    }
+   
 
     private static long getLengthAndPositionAtCentralDirectory(RandomAccessFile a)
         throws IOException {

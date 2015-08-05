@@ -40,52 +40,7 @@ public class X7875_NewUnixTest {
     @Before
     public void before() {
         xf = new X7875_NewUnix();
-    }
-
-
-    @Test
-    public void testSampleFile() throws Exception {
-        File archive = getFile("COMPRESS-211_uid_gid_zip_test.zip");
-        ZipFile zf = null;
-
-        try {
-            zf = new ZipFile(archive);
-            Enumeration<ZipArchiveEntry> en = zf.getEntries();
-
-            // We expect EVERY entry of this zip file (dir & file) to
-            // contain extra field 0x7875.
-            while (en.hasMoreElements()) {
-
-                ZipArchiveEntry zae = en.nextElement();
-                String name = zae.getName();
-                X7875_NewUnix xf = (X7875_NewUnix) zae.getExtraField(X7875);
-
-                // The directory entry in the test zip file is uid/gid 1000.
-                long expected = 1000;
-                if (name.contains("uid555_gid555")) {
-                    expected = 555;
-                } else if (name.contains("uid5555_gid5555")) {
-                    expected = 5555;
-                } else if (name.contains("uid55555_gid55555")) {
-                    expected = 55555;
-                } else if (name.contains("uid555555_gid555555")) {
-                    expected = 555555;
-                } else if (name.contains("min_unix")) {
-                    expected = 0;
-                } else if (name.contains("max_unix")) {
-                    // 2^32-2 was the biggest UID/GID I could create on my linux!
-                    // (December 2012, linux kernel 3.4)
-                    expected = 0x100000000L - 2;
-                }
-                assertEquals(expected, xf.getUID());
-                assertEquals(expected, xf.getGID());
-            }
-        } finally {
-            if (zf != null) {
-                zf.close();
-            }
-        }
-    }
+    }  
 
     @Test
     public void testGetHeaderId() {

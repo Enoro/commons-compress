@@ -73,24 +73,7 @@ public final class Lister {
                 fs.close();
             }
         } else {
-            ZipFile zf = new ZipFile(f, cl.encoding);
-            try {
-                for (Enumeration<ZipArchiveEntry> entries = zf.getEntries();
-                     entries.hasMoreElements(); ) {
-                    ZipArchiveEntry ze = entries.nextElement();
-                    list(ze);
-                    if (cl.dir != null) {
-                        InputStream is = zf.getInputStream(ze);
-                        try {
-                            extract(cl.dir, ze, is);
-                        } finally {
-                            is.close();
-                        }
-                    }
-                }
-            } finally {
-                zf.close();
-            }
+            
         }
     }
 
